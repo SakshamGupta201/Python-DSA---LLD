@@ -195,32 +195,67 @@ class Solution:
         return start
 
     def search(self, nums: list[int], target: int) -> int:
+        if not nums:
+            return -1
 
         pivot = self.pivot_element(nums)
 
-        if nums[pivot] < target:
-            start = 0
-            end = pivot
-
-        else:
+        # Decide which part to search: [pivot, end] or [start, pivot-1]
+        if nums[pivot] <= target <= nums[-1]:
             start = pivot
             end = len(nums) - 1
+        else:
+            start = 0
+            end = pivot - 1
 
-        # end = len(nums) - 1
+        # Standard binary search
+        while start <= end:
+            mid = (start + end) // 2
+            if nums[mid] == target:
+                return mid
+            elif nums[mid] < target:
+                start = mid + 1
+            else:
+                end = mid - 1
+
+        return -1
+
+    def findPages(self, arr: list[int], n: int, m: int) -> int:
+        start = 0
+        end = sum(arr)
+        ans = -1
 
         while start <= end:
             mid = (start + end) // 2
 
-            if nums[mid] == target:
-                return mid
-            elif nums[mid] > target:
+            if self.isPossibleSol(arr, mid, m):
+                ans = mid
                 end = mid - 1
             else:
                 start = mid + 1
-        return -1
+        return ans
+
+    def isPossibleSol(self, arr: list[int], sol: int, m: int) -> bool:
+        student_count = 1
+        curr_sum = 0
+
+        for pages in arr:
+            if pages > sol:
+                return False  # Single book exceeds current mid, not possible
+
+            if curr_sum + pages <= sol:
+                curr_sum += pages
+            else:
+                student_count += 1
+                curr_sum = pages
+                if student_count > m:
+                    return False
+
+        return True
 
 
-nums = [1,3]
-target = 1
+n = 4
+m = 2
+arr = [10, 20, 30, 40]
 sol = Solution()
-print(sol.search(nums, target))
+print(sol.findPages(arr, n, m))
